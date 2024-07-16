@@ -1,17 +1,65 @@
-## Foundry
+## ETH Point of Sale
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+**Add Items to Your E-Store and Process Payments.**
 
-Foundry consists of:
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+Take JSON data and parse it using Foundry:
 
-## Documentation
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "price": 100,
+      "stock": 50
+    },
+    {
+      "id": 2,
+      "price": 200,
+      "stock": 30
+    }
+  ],
+  "saleItems": [
+    {
+      "saleItemId": 1,
+      "quantity": 2,
+      "itemId": 1,
+      "pricePerUnit": 100,
+      "totalPrice": 200
+    },
+    {
+      "saleItemId": 2,
+      "quantity": 1,
+      "itemId": 2,
+      "pricePerUnit": 200,
+      "totalPrice": 200
+    }
+  ],
 
-https://book.getfoundry.sh/
+  ...
+
+}
+```
+
+```solidity
+function getSeedData()
+    public
+    view
+    returns (bytes memory, bytes memory, bytes memory)
+{
+    string memory root = vm.projectRoot();
+    string memory path = string.concat(
+        root,
+        "/test/fixtures/seedData.json"
+    );
+    string memory json = vm.readFile(path);
+
+    bytes memory items = vm.parseJson(json, ".items");
+    bytes memory saleItems = vm.parseJson(json, ".saleItems");
+    bytes memory sales = vm.parseJson(json, ".sales");
+    return (items, saleItems, sales);
+}
+```
 
 ## Usage
 

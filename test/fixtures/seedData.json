@@ -1,0 +1,53 @@
+{
+  "items": [
+    {
+      "id": 1,
+      "price": 100,
+      "stock": 50
+    },
+    {
+      "id": 2,
+      "price": 200,
+      "stock": 30
+    }
+  ],
+  "saleItems": [
+    {
+      "saleItemId": 1,
+      "quantity": 2,
+      "itemId": 1,
+      "pricePerUnit": 100,
+      "totalPrice": 200
+    },
+    {
+      "saleItemId": 2,
+      "quantity": 1,
+      "itemId": 2,
+      "pricePerUnit": 200,
+      "totalPrice": 200
+    }
+  ],
+  "sales": [
+    {
+      "saleId": 1,
+      "timestamp": 1625097600,
+      "totalAmount": 400,
+      "items": [
+        {
+          "saleItemId": 1,
+          "quantity": 2,
+          "itemId": 1,
+          "pricePerUnit": 100,
+          "totalPrice": 200
+        },
+        {
+          "saleItemId": 2,
+          "quantity": 1,
+          "itemId": 2,
+          "pricePerUnit": 200,
+          "totalPrice": 200
+        }
+      ]
+    }
+  ]
+}
