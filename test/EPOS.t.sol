@@ -10,17 +10,18 @@ import {AggregatorV3Interface} from "@chainlink/contracts/v0.8/shared/interfaces
 contract EPOSTest is Test {
     using PriceConverter for uint256;
     EPOS private i_epos;
-    address private STORE_OWNER = address(10001);
+    address private i_storeOwner;
     address private CUSTOMER = address(68089);
     bytes private seedData;
 
     function setUp() public {
-        vm.prank(STORE_OWNER);
+        vm.prank(i_storeOwner);
         DeployEPOS deployEPOS = new DeployEPOS();
         i_epos = deployEPOS.run();
+        i_storeOwner = i_epos.getOwner();
         (bytes memory itemsBytes, , ) = getSeedData();
         EPOS.Item[] memory items = abi.decode(itemsBytes, (EPOS.Item[]));
-        vm.startPrank(STORE_OWNER);
+        vm.startPrank(i_storeOwner);
         for (uint256 i = 0; i < items.length; i++) {
             EPOS.Item memory item = items[i];
             i_epos.addItem(item.id, item.stock, item.price);
@@ -32,6 +33,12 @@ contract EPOSTest is Test {
             );
         }
         vm.stopPrank();
+    }
+
+    function test__addItem__ADD_AN_ITEM() public {
+        vm.prank(i_storeOwner);
+        i_epos.addItem(3, 75, 150);
+        assertEq(i_epos.getItem(3).id, 3);
     }
 
     function test__processPayment__CHECKOUT_A_CUSTOMER() public {
