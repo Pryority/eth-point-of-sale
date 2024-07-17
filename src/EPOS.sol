@@ -23,7 +23,6 @@ contract EPOS {
     uint256 private s_totalRevenue;
     mapping(uint256 => Item) private s_items;
     mapping(uint256 => Sale) private s_sales;
-    mapping(uint256 => Currency) private s_currencies;
 
     struct Item {
         uint256 id;
@@ -158,6 +157,15 @@ contract EPOS {
     /**
      * - V   I   E   W     F   U   N   C   T   I   O   N   S  -
      */
+
+    function getOwner() public view returns (address owner) {
+        return s_owner;
+    }
+
+    function geItemCount() public view returns (uint256 count) {
+        return s_currentItemID;
+    }
+
     function getItem(uint256 _itemId) public view returns (Item memory item) {
         return s_items[_itemId];
     }
