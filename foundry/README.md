@@ -50,7 +50,7 @@ function getSeedData()
     string memory root = vm.projectRoot();
     string memory path = string.concat(
         root,
-        "/test/fixtures/seedData.json"
+        "/test/fixtures/seed.json"
     );
     string memory json = vm.readFile(path);
 
