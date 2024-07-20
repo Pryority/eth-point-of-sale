@@ -4,31 +4,37 @@ pragma solidity ^0.8.18;
 import {AggregatorV3Interface} from "@chainlink/contracts/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import {PriceConverter} from "./PriceConverter.sol";
 
-error UnequalQuantitiesAndProducts();
-error InvalidProductID();
-error InvalidSaleID();
-error DuplicateID();
-error InvalidCurrency();
-error InsufficientStock();
-error InsufficientPayment();
-error NoFundsToWithdraw();
-error NoProductsToPurchase();
+error ERR_UNEQUAL_LENGTH();
+error ERR_NO_FUNDS_TO_WITHDRAW();
+error ERR_PRODUCT_INACTIVE();
+error ERR_INSUFFICIENT_ETHER();
+error ERR_INSUFFICIENT_STOCK();
+error ERR_PRODUCT_ACTIVE();
+error ERR_PRODUCTS_REQUIRED();
+error ERR_ONLY_STORE_OWNER();
+error ERR_SALE_NONEXISTENT();
+error ERR_SALE_COMPLETED();
 
+// •⁄⁄••⁄⁄••⁄⁄••⁄⁄••⁄⁄•
+// |    E  P  O  S    |
+// •⁄⁄••⁄⁄••⁄⁄••⁄⁄••⁄⁄•
 contract EPOS {
     using PriceConverter for uint256;
 
     AggregatorV3Interface private s_priceFeed;
     address private s_owner;
-    uint256 private s_nextProductId;
-    uint256 private s_currentSaleID;
+    uint256 private s_productCount;
+    uint256 private s_saleCount;
     uint256 private s_totalRevenue;
+    uint256 private s_saleIds;
     mapping(uint256 => Product) private s_products;
     mapping(uint256 => Sale) private s_sales;
+    mapping(uint256 => bool) private s_productActive;
+    mapping(uint256 => bool) private s_saleCompleted;
 
     struct Product {
-        uint256 id;
-        uint256 stock;
         uint256 price;
+        uint256 stock;
     }
 
     struct SaleItem {
@@ -40,7 +46,6 @@ contract EPOS {
     }
 
     struct Sale {
-        uint256 saleId;
         uint256 timestamp;
         uint256 totalAmount;
         SaleItem[] products;
@@ -58,56 +63,78 @@ contract EPOS {
     );
 
     modifier onlyOwner() {
-        require(msg.sender == s_owner, "Only the owner can call this");
+        require(msg.sender == s_owner, ERR_ONLY_STORE_OWNER());
         _;
     }
 
     constructor(
-        address _owner,
+        // address _owner,
         address _priceFeed,
         Product[] memory _initialProducts
     ) {
         s_owner = msg.sender;
         s_priceFeed = AggregatorV3Interface(_priceFeed);
-        s_nextProductId = 1;
+        s_productCount = 0;
 
         // Add initial products if provided
-        if (_initialProducts.length > 0) {
-            for (uint256 i = 0; i < _initialProducts.length; i++) {
-                Product memory product = _initialProducts[i];
-                addProduct(product.id, product.price, product.stock);
-            }
+        for (uint256 i = 0; i < _initialProducts.length; i++) {
+            addProduct(
+                i + 1,
+                _initialProducts[i].price,
+                _initialProducts[i].stock
+            );
         }
 
-        s_owner = _owner;
+        // s_owner = _owner;
     }
 
     // Maybe create a function that creates a commitment of a payment...
     // The clerk checking out the customer creates the commitment, the customer provides the commitment during payment by scanning a QR or something.
     // function createCommitment() public view returns (bytes32 commitment) {}
+    modifier activeProduct(uint256 _productId) {
+        require(s_productActive[_productId], ERR_PRODUCT_INACTIVE());
+        _;
+    }
+
+    modifier inactiveProduct(uint256 _productId) {
+        require(!s_productActive[_productId], ERR_PRODUCT_ACTIVE());
+        _;
+    }
+
+    modifier equal(uint256[] memory _productIds, uint256[] memory _quantities) {
+        require(_productIds.length == _quantities.length, ERR_UNEQUAL_LENGTH());
+        _;
+    }
+
+    modifier completed(uint256 _saleId) {
+        require(s_saleCompleted[_saleId], ERR_SALE_NONEXISTENT());
+        _;
+    }
 
     function addProduct(
         uint256 _id,
         uint256 _price,
         uint256 _stock
-    ) public onlyOwner {
-        if (s_products[s_nextProductId].id != 0) {
-            revert DuplicateID();
-        }
-        s_products[_id] = Product(_id, _price, _stock);
-        s_nextProductId++;
+    ) public onlyOwner inactiveProduct(_id) {
+        s_products[_id] = Product(_price, _stock);
+        s_productActive[_id] = true;
+        s_productCount++;
+    }
+
+    function updateProduct(
+        uint256 _id,
+        uint256 _price,
+        uint256 _stock
+    ) public onlyOwner activeProduct(_id) {
+        s_products[_id] = Product(_price, _stock);
     }
 
     function processPayment(
         uint256[] memory _productIds,
         uint256[] memory _quantities
-    ) public payable {
-        if (_productIds.length != _quantities.length) {
-            revert UnequalQuantitiesAndProducts();
-        }
-        if (_productIds.length == 0) {
-            revert NoProductsToPurchase();
-        }
+    ) public payable equal(_productIds, _quantities) {
+        require(_productIds.length != 0, ERR_PRODUCTS_REQUIRED());
+        require(!s_saleCompleted[s_saleCount], ERR_SALE_COMPLETED());
 
         uint256 totalAmountInEth = 0;
         uint256 totalAmountInCurrency = 0;
@@ -118,9 +145,7 @@ contract EPOS {
             uint256 quantity = _quantities[i];
             Product memory product = getProduct(productId);
 
-            if (product.stock < quantity) {
-                revert InsufficientStock();
-            }
+            require(product.stock > quantity, ERR_INSUFFICIENT_STOCK());
 
             uint256 productTotalInCurrency = product.price * quantity;
             uint256 productTotalInEth = productTotalInCurrency
@@ -141,13 +166,10 @@ contract EPOS {
             );
         }
 
-        if (msg.value < totalAmountInEth) {
-            revert InsufficientPayment();
-        }
+        require(msg.value >= totalAmountInEth, ERR_INSUFFICIENT_ETHER());
 
-        s_currentSaleID++;
-        s_sales[s_currentSaleID] = Sale(
-            s_currentSaleID,
+        s_saleCount++;
+        s_sales[s_saleCount] = Sale(
             block.timestamp,
             totalAmountInEth,
             saleProducts
@@ -159,8 +181,9 @@ contract EPOS {
             payable(msg.sender).transfer(msg.value - totalAmountInEth);
         }
 
+        s_saleCompleted[s_saleCount] = true;
         emit SaleCompleted(
-            s_currentSaleID,
+            s_saleCount,
             totalAmountInEth,
             totalAmountInCurrency
         );
@@ -168,30 +191,33 @@ contract EPOS {
 
     function withdrawFunds() public onlyOwner {
         uint256 balance = address(this).balance;
-        require(balance > 0, NoFundsToWithdraw());
+        require(balance > 0, ERR_NO_FUNDS_TO_WITHDRAW());
         payable(s_owner).transfer(balance);
     }
 
-    /**
-     * - V   I   E   W     F   U   N   C   T   I   O   N   S  -
-     */
+    // VIEW FUNCTIONS --
+    function getProduct(
+        uint256 _productId
+    ) public view activeProduct(_productId) returns (Product memory product) {
+        return s_products[_productId];
+    }
+
+    function getSale(
+        uint256 _saleId
+    ) public view completed(_saleId) returns (Sale memory sale) {
+        return s_sales[_saleId];
+    }
+
     function getOwner() public view returns (address owner) {
         return s_owner;
     }
 
     function getProductCount() public view returns (uint256 count) {
-        return s_nextProductId;
+        return s_productCount;
     }
 
-    function getProduct(
-        uint256 _productId
-    ) public view returns (Product memory product) {
-        return s_products[_productId];
-    }
-
-    function getSale(uint256 _saleId) public view returns (Sale memory sale) {
-        require(_saleId <= s_currentSaleID && _saleId > 0, InvalidSaleID());
-        return s_sales[_saleId];
+    function productActive(uint256 _productId) public view returns (bool yes) {
+        return s_productActive[_productId];
     }
 
     function getPriceFeedAddress() public view returns (address priceFeed) {

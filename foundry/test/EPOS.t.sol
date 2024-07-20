@@ -12,40 +12,37 @@ contract EPOSTest is Test {
     using PriceConverter for uint256;
 
     EPOS private i_epos;
-    address private i_storeOwner;
+    address private STORE_OWNER;
     address private CUSTOMER = address(68089);
     bytes private seedData;
     Seed private seed;
 
     function setUp() public {
-        vm.prank(i_storeOwner);
+        vm.prank(STORE_OWNER);
         DeployEPOS deployEPOS = new DeployEPOS();
         seed = new Seed();
         i_epos = deployEPOS.run();
-        i_storeOwner = i_epos.getOwner();
+        STORE_OWNER = i_epos.getOwner();
         (bytes memory productsBytes, , ) = seed.getData();
         EPOS.Product[] memory products = abi.decode(
             productsBytes,
             (EPOS.Product[])
         );
-        vm.startPrank(i_storeOwner);
+        vm.startPrank(STORE_OWNER);
         for (uint256 i = 0; i < products.length; i++) {
             EPOS.Product memory product = products[i];
-            i_epos.addProduct(product.id, product.stock, product.price);
-            // console2.log(
-            //     "Product ID: %d, Price: %d, Stock: %d",
-            //     product.id,
-            //     product.stock,
-            //     product.price
-            // );
+            if (!i_epos.productActive(i + 1)) {
+                i_epos.addProduct(i + 1, product.price, product.stock);
+            }
         }
+
         vm.stopPrank();
     }
 
     function test__addProduct__ADD_AN_PRODUCT() public {
-        vm.prank(i_storeOwner);
-        i_epos.addProduct(3, 75, 150);
-        assertEq(i_epos.getProduct(3).id, 3);
+        vm.prank(STORE_OWNER);
+        i_epos.addProduct(123000, 123, 10);
+        assertEq(i_epos.productActive(123000), true);
     }
 
     function test__processPayment__CHECKOUT_A_CUSTOMER() public {
@@ -63,30 +60,27 @@ contract EPOSTest is Test {
 
         for (uint256 i = 0; i < saleItem.length; i++) {
             EPOS.SaleItem memory product = saleItem[i];
-            uint256 quantity = product.quantity;
+            EPOS.Product memory inventoryProduct = i_epos.getProduct(
+                product.productId
+            );
+            console2.log(
+                "Product %d -- Requested: %d, Available: %d",
+                product.productId,
+                product.quantity,
+                inventoryProduct.stock
+            );
             uint256 productTotalInCurrency = i_epos
-                .getProduct(product.saleProductId)
-                .price * quantity;
+                .getProduct(product.productId)
+                .price * product.quantity;
             uint256 productTotalInEth = productTotalInCurrency
                 .getConversionRate(
                     AggregatorV3Interface(i_epos.getPriceFeedAddress())
                 );
 
-            saleProductIds[i] = saleItem[i].saleProductId;
-            quantities[i] = saleItem[i].quantity;
-            totalAmountInEth += productTotalInEth;
+            saleProductIds[i] = product.productId;
+            quantities[i] = product.quantity;
 
-            // console2.log(
-            //     "SaleItem %d -- Quantity: %d, Product ID: %d",
-            //     saleProductId,
-            //     quantity,
-            //     productId
-            // );
-            // console2.log(
-            //     "------------- Price Per Unit: %d, Total Price: %d",
-            //     pricePerUnit,
-            //     totalPrice
-            // );
+            totalAmountInEth += productTotalInEth;
         }
 
         hoax(CUSTOMER, totalAmountInEth);

@@ -1,13 +1,11 @@
 {
   "products": [
     {
-      "id": 1,
-      "price": 100,
+      "price": 149,
       "stock": 50
     },
     {
-      "id": 2,
-      "price": 200,
+      "price": 499,
       "stock": 30
     }
   ],
@@ -15,16 +13,16 @@
     {
       "saleItemId": 1,
       "quantity": 2,
-      "itemId": 1,
-      "pricePerUnit": 100,
-      "totalPrice": 200
+      "itemId": 2,
+      "pricePerUnit": 149,
+      "totalPrice": 298
     },
     {
       "saleItemId": 2,
       "quantity": 1,
-      "itemId": 2,
-      "pricePerUnit": 200,
-      "totalPrice": 200
+      "itemId": 1,
+      "pricePerUnit": 499,
+      "totalPrice": 499
     }
   ],
   "sales": [
@@ -36,14 +34,14 @@
         {
           "saleItemId": 1,
           "quantity": 2,
-          "itemId": 1,
+          "itemId": 69,
           "pricePerUnit": 100,
           "totalPrice": 200
         },
         {
           "saleItemId": 2,
           "quantity": 1,
-          "itemId": 2,
+          "itemId": 420,
           "pricePerUnit": 200,
           "totalPrice": 200
         }
