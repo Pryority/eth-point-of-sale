@@ -7,6 +7,7 @@ import { client } from "./lib/client";
 import { productData } from "./lib/constants";
 import ProductGrid from "./components/ProductGrid";
 import ProductPage from "./components/ProductPage";
+import Header from "./components/Header";
 
 function App() {
   const [products, setProducts] = useState<Product[] | null>(null);
@@ -43,6 +44,7 @@ function App() {
   return (
     <Router>
       <div className="flex flex-col min-h-screen w-screen items-center">
+        <Header />
         <Routes>
           <Route path="/" element={<ProductGrid products={products} />} />
           <Route
