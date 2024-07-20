@@ -1,6 +1,6 @@
 # ETH Point of Sale
 
-![DEMO](./store-demo.png)
+![DEMO](./store-demo.jpeg)
 
 ## Lightweight, easy to setup and use onchain store system.
 

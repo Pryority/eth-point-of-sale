@@ -5,7 +5,7 @@ export const productData: {
 } = {
   "1": {
     name: "Iced Coffee",
-    description: "A crisp and sweet fruit",
+    description: "A yummy drink to refuel your stamina.",
     image: new URL("../assets/iced-coffee.jpg", import.meta.url).href,
   },
   "2": {
