@@ -9,7 +9,7 @@ import {
 import { addProduct } from "./actions/write";
 
 const FOUNDRY_MOCK_ADDRESS_1 = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
-const STORE_ADDRESS = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+const STORE_ADDRESS = "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82";
 import artifactJson from "../../../foundry/out/EPOS.sol/EPOS.json";
 // Extract relevant information from Foundry deployment artifacts
 // const address = artifactJson.address;

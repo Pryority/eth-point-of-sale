@@ -169,7 +169,7 @@ function App() {
         if (fetchedProducts && fetchedProducts.length > 0) {
           const products: Product[] = fetchedProducts.map(([id, product]) => ({
             id: Number(id),
-            price: Number(product.price),
+            price: Number(product.price) / 100,
             stock: Number(product.stock),
             name: productData[id.toString()]?.name ?? `Product ${id}`,
             description: productData[id.toString()]?.description ?? "",

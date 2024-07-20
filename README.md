@@ -1,15 +1,5 @@
-# epos
+![DEMO][./store-demo.jpeg]
 
-To install dependencies:
+# ETH Point of Sale
 
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.0. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+Goal is to make a lightweight, easy to setup and use onchain store system.

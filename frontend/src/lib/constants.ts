@@ -9,9 +9,9 @@ export const productData: {
     image: new URL("../assets/iced-coffee.jpg", import.meta.url).href,
   },
   "2": {
-    name: "Banana",
-    description: "A yellow, curved tropical fruit",
-    image: "https://picsum.photos/seed/banana2/300/300",
+    name: "Chocolate Chip Cookie",
+    description: "A delectable treat.",
+    image: new URL("../assets/chocolate-chip-cookie.jpg", import.meta.url).href,
   },
   "3": {
     name: "Orange",
