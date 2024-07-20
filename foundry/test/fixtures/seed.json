@@ -1,11 +1,11 @@
 {
   "products": [
     {
-      "price": 149,
+      "price": 499,
       "stock": 50
     },
     {
-      "price": 499,
+      "price": 199,
       "stock": 30
     }
   ],
@@ -13,16 +13,16 @@
     {
       "saleItemId": 1,
       "quantity": 2,
-      "itemId": 2,
-      "pricePerUnit": 149,
-      "totalPrice": 298
+      "itemId": 1,
+      "pricePerUnit": 499,
+      "totalPrice": 998
     },
     {
       "saleItemId": 2,
       "quantity": 1,
-      "itemId": 1,
-      "pricePerUnit": 499,
-      "totalPrice": 499
+      "itemId": 2,
+      "pricePerUnit": 199,
+      "totalPrice": 199
     }
   ],
   "sales": [
