@@ -7,6 +7,8 @@ DEPLOY_SCRIPT = DeployEPOS.s.sol
 RPC_URL ?= http://localhost:8545
 SENDER ?= 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 V ?= vv
+MT ?=
+MT_FLAG := $(if $(MT),--mt,)
 
 # Default goal
 .DEFAULT_GOAL := help
@@ -26,7 +28,7 @@ anvil:
 # Test command
 test:
 	@echo "Running tests..."
-	cd foundry && $(FORGE) test --via-ir -$(V)
+	cd foundry && $(FORGE) test --via-ir -$(V) $(MT_FLAG) $(MT)
 
 # Deploy command
 deploy:
