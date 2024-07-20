@@ -67,11 +67,7 @@ contract EPOS {
         _;
     }
 
-    constructor(
-        // address _owner,
-        address _priceFeed,
-        Product[] memory _initialProducts
-    ) {
+    constructor(address _priceFeed, Product[] memory _initialProducts) {
         s_owner = msg.sender;
         s_priceFeed = AggregatorV3Interface(_priceFeed);
         s_productCount = 0;
@@ -84,8 +80,6 @@ contract EPOS {
                 _initialProducts[i].stock
             );
         }
-
-        // s_owner = _owner;
     }
 
     // Maybe create a function that creates a commitment of a payment...
