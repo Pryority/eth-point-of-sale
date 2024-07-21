@@ -40,30 +40,36 @@ A project to practice my Foundry, Viem and Vite frontend skills.
         1. At Deployment:
 
             ```solidity
-            constructor(address _priceFeed, Product[] memory _initialProducts) {
-                    s_owner = msg.sender;
-                    s_priceFeed = AggregatorV3Interface(_priceFeed);
-                    s_productCount = 0;
+            /// @notice Contract constructor
+            /// @param _priceFeed Address of the price feed contract
+            /// @param _initialProducts Array of initial products to add
+            constructor(address _priceFeed, Store.Product[] memory _initialProducts) {
+                s_owner = msg.sender;
+                s_priceFeed = AggregatorV3Interface(_priceFeed);
 
-                    for (uint256 i = 0; i < _initialProducts.length; i++) {
-                        addProduct(
-                            i + 1,
-                            _initialProducts[i].price,
-                            _initialProducts[i].stock
-                        );
-                    }
+                for (uint256 i = 0; i < _initialProducts.length; i++) {
+                    addProduct(
+                        i + 1,
+                        _initialProducts[i].price,
+                        _initialProducts[i].stock
+                    );
                 }
+            }
             ```
 
         2. After Deployment:
 
             ```solidity
+            /// @notice Adds a new product to the store
+            /// @param _id Product ID
+            /// @param _price Product price
+            /// @param _stock Product stock
             function addProduct(
                 uint256 _id,
                 uint256 _price,
                 uint256 _stock
             ) public onlyOwner inactiveProduct(_id) {
-                s_products[_id] = Product(_price, _stock);
+                s_products[_id] = Store.Product(_price, _stock);
                 s_productActive[_id] = true;
                 s_productCount++;
             }
@@ -72,11 +78,19 @@ A project to practice my Foundry, Viem and Vite frontend skills.
     2. **READ**
 
          ```solidity
-             function getProduct(
-                uint256 _productId
-            ) public view activeProduct(_productId) returns (Product memory product) {
-                return s_products[_productId];
-            }
+         /// @notice Retrieves a product by ID
+         /// @param _productId Product ID
+         /// @return product The product details
+         function getProduct(
+             uint256 _productId
+         )
+             public
+             view
+             activeProduct(_productId)
+             returns (Store.Product memory product)
+         {
+             return s_products[_productId];
+         }
         ```
 
         - Use `make get id=<ID>` to get the product with `ID`:
@@ -91,12 +105,16 @@ A project to practice my Foundry, Viem and Vite frontend skills.
     3. **UPDATE**
 
         ```solidity
+        /// @notice Updates an existing product
+        /// @param _id Product ID
+        /// @param _price New product price
+        /// @param _stock New product stock
         function updateProduct(
             uint256 _id,
             uint256 _price,
             uint256 _stock
         ) public onlyOwner activeProduct(_id) {
-            s_products[_id] = Product(_price, _stock);
+            s_products[_id] = Store.Product(_price, _stock);
         }
         ```
 
@@ -108,4 +126,3 @@ A project to practice my Foundry, Viem and Vite frontend skills.
             // Output:
             0x00000000000000000000000000000000000000000000000000000000000001f30000000000000000000000000000000000000000000000000000000000000032
             ```
-
