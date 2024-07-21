@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import {Script, console} from "forge-std/Script.sol";
 import {EPOS} from "../src/EPOS.sol";
+import {Store} from "../src/Store.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 import {Seed} from "./Seed.s.sol";
 
@@ -14,9 +15,9 @@ contract DeployEPOS is Script {
         Seed seed = new Seed();
         (, address priceFeed) = helperConfig.activeNetworkConfig();
         (bytes memory seedProducts, , ) = seed.getData();
-        EPOS.Product[] memory initialProducts = abi.decode(
+        Store.Product[] memory initialProducts = abi.decode(
             seedProducts,
-            (EPOS.Product[])
+            (Store.Product[])
         );
 
         vm.broadcast(deployerPrivateKey);

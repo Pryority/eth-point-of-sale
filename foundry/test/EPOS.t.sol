@@ -3,6 +3,7 @@ pragma solidity ^0.8.18;
 
 import {Test, stdError, console2} from "forge-std/Test.sol";
 import {EPOS} from "../src/EPOS.sol";
+import {Store} from "../src/Store.sol";
 import {DeployEPOS} from "../script/DeployEPOS.s.sol";
 import {Seed} from "../script/Seed.s.sol";
 import {PriceConverter} from "../src/PriceConverter.sol";
@@ -24,13 +25,13 @@ contract EPOSTest is Test {
         i_epos = deployEPOS.run();
         STORE_OWNER = i_epos.getOwner();
         (bytes memory productsBytes, , ) = seed.getData();
-        EPOS.Product[] memory products = abi.decode(
+        Store.Product[] memory products = abi.decode(
             productsBytes,
-            (EPOS.Product[])
+            (Store.Product[])
         );
         vm.startPrank(STORE_OWNER);
         for (uint256 i = 0; i < products.length; i++) {
-            EPOS.Product memory product = products[i];
+            Store.Product memory product = products[i];
             if (!i_epos.productActive(i + 1)) {
                 i_epos.addProduct(i + 1, product.price, product.stock);
             }
@@ -48,39 +49,39 @@ contract EPOSTest is Test {
     function test__processPayment__CHECKOUT_A_CUSTOMER() public {
         uint256 contractInitialBalance = address(i_epos).balance;
         console2.log("EPOS Initial Balance: %d", contractInitialBalance);
-        (, bytes memory saleItemBytes, ) = seed.getData();
-        EPOS.SaleItem[] memory saleItem = abi.decode(
-            saleItemBytes,
-            (EPOS.SaleItem[])
+        (, bytes memory saleItemsBytes, ) = seed.getData();
+        Store.SaleItem[] memory saleItems = abi.decode(
+            saleItemsBytes,
+            (Store.SaleItem[])
         );
-        uint256[] memory saleProductIds = new uint256[](saleItem.length);
-        uint256[] memory quantities = new uint256[](saleItem.length);
+        uint256[] memory saleProductIds = new uint256[](saleItems.length);
+        uint256[] memory quantities = new uint256[](saleItems.length);
 
         uint256 totalAmountInEth = 0;
 
-        for (uint256 i = 0; i < saleItem.length; i++) {
-            EPOS.SaleItem memory product = saleItem[i];
-            EPOS.Product memory inventoryProduct = i_epos.getProduct(
-                product.productId
-            );
-            console2.log(
-                "Product %d -- Requested: %d, Available: %d",
-                product.productId,
-                product.quantity,
-                inventoryProduct.stock
-            );
-            uint256 productTotalInCurrency = i_epos
-                .getProduct(product.productId)
-                .price * product.quantity;
-            uint256 productTotalInEth = productTotalInCurrency
+        for (uint256 i = 0; i < saleItems.length; i++) {
+            Store.SaleItem memory saleItem = saleItems[i];
+            // Store.Product memory inventoryProduct = i_epos.getProduct(
+            //     saleItem.saleItemId
+            // );
+            // console2.log(
+            //     "Product %d -- Requested: %d, Available: %d",
+            //     saleItem.saleItemId,
+            //     saleItem.quantity,
+            //     inventoryProduct.stock
+            // );
+            uint256 saleItemTotalInCurrency = i_epos
+                .getProduct(saleItem.productId)
+                .price * saleItem.quantity;
+            uint256 saleItemTotalInEth = saleItemTotalInCurrency
                 .getConversionRate(
                     AggregatorV3Interface(i_epos.getPriceFeedAddress())
                 );
 
-            saleProductIds[i] = product.productId;
-            quantities[i] = product.quantity;
+            saleProductIds[i] = saleItem.productId;
+            quantities[i] = saleItem.quantity;
 
-            totalAmountInEth += productTotalInEth;
+            totalAmountInEth += saleItemTotalInEth;
         }
 
         hoax(CUSTOMER, totalAmountInEth);
