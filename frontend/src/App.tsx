@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Product } from "./lib/types";
 import { EPOS } from "./lib/EPOS";
 import { client } from "./lib/client";
@@ -8,14 +8,23 @@ import { productData } from "./lib/constants";
 import ProductGrid from "./components/ProductGrid";
 import ProductPage from "./components/ProductPage";
 import Header from "./components/Header";
+import useStore from "./lib/hooks/useStore";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
-  const [products, setProducts] = useState<Product[] | null>(null);
+  const [store, setStore] = useStore();
   useEffect(() => {
     const fetchProducts = async () => {
+      setStore((prev) => ({
+        ...prev,
+        products: {
+          data: null,
+          loading: true,
+          error: null,
+        },
+      }));
       try {
         const fetchedProducts = await EPOS.getProducts(client);
-        console.log("Fetched products:", fetchedProducts);
 
         if (fetchedProducts && fetchedProducts.length > 0) {
           const products: Product[] = fetchedProducts.map(([id, product]) => ({
@@ -28,31 +37,62 @@ function App() {
               productData[id.toString()]?.image ??
               "https://example.com/image.png",
           }));
-          console.log("Processed products:", products);
-          setProducts(products);
+          console.log("Products:", products);
+          setStore((prev) => ({
+            ...prev,
+            products: { data: products, loading: false, error: null },
+          }));
         } else {
           console.error("No active products fetched.");
+          setStore((prev) => ({
+            ...prev,
+            products: {
+              data: null,
+              loading: false,
+              error: "No active products fetched.",
+            },
+          }));
         }
       } catch (error) {
         console.error("Could not fetch products:", error);
+        setStore((prev) => ({
+          ...prev,
+          products: {
+            data: null,
+            loading: false,
+            error: "Could not fetch products.",
+          },
+        }));
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [setStore]);
 
   return (
     <Router>
       <div className="flex flex-col min-h-screen w-screen items-center">
         <Header />
         <Routes>
-          <Route path="/" element={<ProductGrid products={products} />} />
+          <Route
+            path="/"
+            element={
+              <ProductGrid
+                products={store.products ? store.products.data : []}
+              />
+            }
+          />
           <Route
             path="/product/:id"
-            element={<ProductPage products={products} />}
+            element={
+              <ProductPage
+                products={store.products ? store.products.data : []}
+              />
+            }
           />
         </Routes>
       </div>
+      <Toaster />
     </Router>
   );
 }
