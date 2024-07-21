@@ -35,7 +35,7 @@ A project to practice my Foundry, Viem and Vite frontend skills.
 
 2. ##### CRUD Your Products
 
-    1. **Create**
+    1. **CREATE**
 
         1. At Deployment:
 
@@ -45,7 +45,6 @@ A project to practice my Foundry, Viem and Vite frontend skills.
                     s_priceFeed = AggregatorV3Interface(_priceFeed);
                     s_productCount = 0;
 
-                    // Add initial products if provided
                     for (uint256 i = 0; i < _initialProducts.length; i++) {
                         addProduct(
                             i + 1,
@@ -69,3 +68,44 @@ A project to practice my Foundry, Viem and Vite frontend skills.
                 s_productCount++;
             }
             ```
+
+    2. **READ**
+
+         ```solidity
+             function getProduct(
+                uint256 _productId
+            ) public view activeProduct(_productId) returns (Product memory product) {
+                return s_products[_productId];
+            }
+        ```
+
+        - Use `make get id=<ID>` to get the product with `ID`:
+
+            ```bash
+            make get ID=1
+
+            // Output:
+            0x00000000000000000000000000000000000000000000000000000000000001f30000000000000000000000000000000000000000000000000000000000000032
+            ```
+
+    3. **UPDATE**
+
+        ```solidity
+        function updateProduct(
+            uint256 _id,
+            uint256 _price,
+            uint256 _stock
+        ) public onlyOwner activeProduct(_id) {
+            s_products[_id] = Product(_price, _stock);
+        }
+        ```
+
+        - Use `make update id=<ID> price=<PRICE> stock=<STOCK>` to update the product with `ID`:
+
+            ```bash
+            make get ID=1
+
+            // Output:
+            0x00000000000000000000000000000000000000000000000000000000000001f30000000000000000000000000000000000000000000000000000000000000032
+            ```
+
