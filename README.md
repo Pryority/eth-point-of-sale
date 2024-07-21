@@ -1,6 +1,7 @@
 # ETH Point of Sale
 
 ![DEMO](./store-demo.jpeg)
+![MOBILE_DEMO](./mobile-demo.png)
 
 ## Lightweight, easy to setup and use onchain store system.
 
@@ -30,7 +31,7 @@ contract Seed is Script {
 }
 ```
 
-2. #### Add Products  
+2. #### Add Products
 
     1. At Deployment:
 
