@@ -9,9 +9,14 @@
     }
   ],
   "compilerOptions": {
+    "plugins": [
+      {
+        "name": "@tevm/ts-plugin"
+      }
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@foundry/*": ["../foundry/*"]
     }
   }
 }

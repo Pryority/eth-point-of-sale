@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.0",
+    "@tevm/ts-plugin": "^1.1.0-next.96",
+    "@tevm/vite-plugin": "^1.1.0-next.96",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "jotai": "^2.9.0",
@@ -22,6 +24,7 @@
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
+    "tevm": "^1.1.0-next.100",
     "viem": "^2.17.5"
   },
   "devDependencies": {

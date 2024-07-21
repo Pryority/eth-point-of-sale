@@ -3,7 +3,7 @@ import "./App.css";
 import { useEffect } from "react";
 import { Product } from "./lib/types";
 import { EPOS } from "./lib/EPOS";
-import { client } from "./lib/client";
+import { client, memoryClient } from "./lib/client";
 import { productData } from "./lib/constants";
 import ProductGrid from "./components/ProductGrid";
 import ProductPage from "./components/ProductPage";
@@ -25,7 +25,8 @@ function App() {
       }));
       try {
         const fetchedProducts = await EPOS.getProducts(client);
-
+        const blockNumber = await memoryClient.getBlockNumber();
+        console.log("blockNumber", blockNumber);
         if (fetchedProducts && fetchedProducts.length > 0) {
           const products: Product[] = fetchedProducts.map(([id, product]) => ({
             id: Number(id),

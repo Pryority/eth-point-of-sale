@@ -27,6 +27,7 @@ type ProductData = {
 };
 
 type EPOSConfig = {
+  contract: unknown;
   address: Address;
   owner: Address;
   abi: Abi;
