@@ -1,9 +1,9 @@
 # ETH Point of Sale
 
+## The Simple Onchain Store System
+
 ![DEMO](./store-demo.jpeg)
 ![MOBILE_DEMO](./mobile-demo.png)
-
-## Lightweight, easy to setup and use onchain store system.
 
 A project to practice my Foundry, Viem and Vite frontend skills.
 
